@@ -1,11 +1,47 @@
 import flet as ft
 from flet_core.user_control import UserControl
+from flet_core.template_route import TemplateRoute
 
+
+class Layout(ft.Row):
+    def _init__(self,app,  page: ft.Page):
+        super().__init__()
+        self.app = app
+        self.page = page
+        self.rail = ft.NavigationRail(
+            selected_index=0,
+            label_type=ft.NavigationRailLabelType.ALL,
+            # extended=True,
+            min_width=100,
+            min_extended_width=400,
+            leading=ft.FloatingActionButton(icon=ft.icons.CREATE, text="Add"),
+            group_alignment=-0.9,
+            destinations=[
+                ft.NavigationRailDestination(
+                    icon=ft.icons.FAVORITE_BORDER, selected_icon=ft.icons.FAVORITE, label="First"
+                ),
+                ft.NavigationRailDestination(
+                    icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
+                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    label="Second",
+                ),
+                ft.NavigationRailDestination(
+                    icon=ft.icons.SETTINGS_OUTLINED,
+                    selected_icon_content=ft.Icon(ft.icons.SETTINGS),
+                    label_content=ft.Text("Settings"),
+                ),
+            ],
+            on_change=lambda e: print("Selected destination:", e.control.selected_index),
+        )
+    def main_page_view(self):
+        self.page.add(self.rail)
+        self.page.update()
 class Navigation(UserControl):
     def __init__(self,page: ft.Page):
         super().__init__()
         self.page = page
-        self.page.appbar = ft.AppBar(
+        self.page.on_route_change = self.route_change
+        self.appbar = ft.AppBar(
             leading=ft.Container(
                 ft.CircleAvatar(
                     content=ft.Text('user')
@@ -28,61 +64,33 @@ class Navigation(UserControl):
                 ),
             ],
         )
+        self.page.appbar = self.appbar
         self.page.update()
     def build(self):
-        return ft.Text('qwe')
-        # def __init__(self, page: Page):
-    #     self.page = page
-    #     self.appbar_items = [
-    #         PopupMenuItem(text="Login"),
-    #         PopupMenuItem(),  # divider
-    #         PopupMenuItem(text="Settings")
-    #     ]
-    #     self.appbar = AppBar(
-    #         leading=Icon(icons.GRID_GOLDENRATIO_ROUNDED),
-    #         leading_width=100,
-    #         title=Text("Trolli",size=32, text_align="start"),
-    #         center_title=False,
-    #         toolbar_height=75,
-    #         bgcolor=colors.LIGHT_BLUE_ACCENT_700,
-    #         actions=[
-    #             Container(
-    #                 content=PopupMenuButton(
-    #                     items=self.appbar_items
-    #                 ),
-    #                 margin=margin.only(left=50, right=25)
-    #             )
-    #         ],
-    #     )
-    #     self.page.appbar = self.appbar
-    #     self.page.update()
+        self.box = Layout(self,self.page)
+        return self.box
+    def initialize(self):
+        self.page.views.clear()
+        self.page.views.append(
+            ft.View(
+                "/",
+                [self.appbar, self.box],
+            )
+        )
+        self.page.go("/")
+        # self.page.update()
+    def route_change(self, e):
+        troute = TemplateRoute(self.page.route)
+        if troute.match("/"):
+            self.box.main_page_view()
 
+        self.page.update()
 def main(page: ft.Page):
-        app = Navigation(page)
-        page.add(app)
-        page.update()
-    # page.appbar = ft.AppBar(
-    #     leading=ft.Icon(ft.icons.PALETTE),
-    #     leading_width=40,
-    #     title=ft.Text("AppBar Example"),
-    #     center_title=False,
-    #     bgcolor=ft.colors.SURFACE_VARIANT,
-    #     actions=[
-    #         ft.IconButton(ft.icons.WB_SUNNY_OUTLINED),
-    #         ft.IconButton(ft.icons.FILTER_3),
-    #         ft.PopupMenuButton(
-    #             items=[
-    #                 ft.PopupMenuItem(text="Item 1"),
-    #                 ft.PopupMenuItem(),  # divider
-    #                 ft.PopupMenuItem(
-    #                     text="Checked item", checked=False, 
-    #                 ),
-    #             ]
-    #         ),
-    #     ],
-    # )
-
-    # page.update()
+    page.title = 'LAND расписание'
+    app = Navigation(page)
+    page.add(app)
+    page.update()
+    app.initialize()
 
 
 
