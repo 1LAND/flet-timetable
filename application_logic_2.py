@@ -14,40 +14,48 @@ class ClassBar(f.UserControl):
             width=150,
             horizontal_alignment=f.CrossAxisAlignment.CENTER,
             )
-        self.dlg = f.AlertDialog(
-        modal=True,
-        title=f.Text("Добавить урок"),
-        content=f.Column([
-            f.Row([
+    def create_alert(self):
+
+        self.lessons = f.Ref[f.Dropdown]()
+        self.teachers = f.Ref[f.Dropdown]()
+        self.rooms = f.Ref[f.Dropdown]()
+
+        dict_dropdown = {
+            'Уроки':self.lessons,
+            'Учителя':self.teachers,
+            'Кабинеты':self.rooms,
+        }
+
+        list_dropdown = []
+
+        for i in dict_dropdown:
+            list_dropdown.append(
                 f.Dropdown(
-                        width=110,
-                        options=[
-                            f.dropdown.Option("Red"),
-                            f.dropdown.Option("Green"),
-                            f.dropdown.Option("Blue"),
-                        ],
-                    ),
-                    f.Dropdown(
-                        width=110,
-                        options=[
-                            f.dropdown.Option("Red"),
-                            f.dropdown.Option("Green"),
-                            f.dropdown.Option("Blue"),
-                        ],
-                    )
-                ]),
-        ],
-        height=150,
-        horizontal_alignment=f.CrossAxisAlignment.CENTER 
-        ),
-        actions=[
-            f.TextButton("Закрыть",on_click=self.close_alert),
-            f.FloatingActionButton(icon=f.icons.ADD,), 
-        ],
-        actions_alignment=f.MainAxisAlignment.END,
-        on_dismiss=lambda e: print("Modal dialog dismissed!"),
-    ) 
+                    ref=dict_dropdown[i],
+                    width=150,
+                    label=i,
+                    options=[
+                        f.dropdown.Option('None'),
+                    ]
+                )
+            )
+        self.dlg = f.AlertDialog(
+            modal=True,
+            title=f.Text("Добавить урок"),
+            content=f.Column(
+                controls=list_dropdown,
+                height=200,
+                horizontal_alignment=f.CrossAxisAlignment.CENTER 
+                ),
+            actions=[
+                f.TextButton("Закрыть",on_click=self.close_alert),
+                f.FloatingActionButton(icon=f.icons.ADD,), 
+            ],
+            actions_alignment=f.MainAxisAlignment.END,
+            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        ) 
     def build(self):
+        self.create_alert()
         self.layout.controls.append(self.add_btn)
         return f.Row([
             self.layout,
