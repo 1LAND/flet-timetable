@@ -7,8 +7,10 @@ class DragAndDrop(ft.UserControl):
         self.page = page
         self.__ref = ft.Ref[ft.Draggable]()
         self.__bgcolor = bgcolor
-        self.__text = ft.Text(text, size=text_size)
         self.__group = group
+        if not text:    
+            text = group
+        self.__text = ft.Text(text, size=text_size)
     def drag_will_accept(self,e):
         e.control.content.border = ft.border.all(
             2, ft.colors.BLACK45 if e.data == "true" else ft.colors.RED
@@ -32,10 +34,10 @@ class DragAndDrop(ft.UserControl):
                 ref=self.__ref,
                 group=self.__group,
                 content=ft.Container(
-                    width=50,
-                    height=50,
+                    width=55,
+                    height=55,
                     bgcolor=self.__bgcolor,
-                    border_radius=5,
+                    border_radius=15,
                     content=self.__text,
                     alignment=ft.alignment.center,
                 ),
@@ -45,7 +47,9 @@ class DragAndDrop(ft.UserControl):
                             bgcolor=self.__bgcolor,
                             border_radius=3,
                         ),
-            )])
+            )],
+            alignment=ft.MainAxisAlignment.CENTER
+            )
     def new_grag_drop(self):
         return ft.Row([ft.DragTarget(
                     group=self.__group,
@@ -89,3 +93,14 @@ class DragAndDrop(ft.UserControl):
     @group.setter
     def group(self,group):
         self.__group = group
+
+
+if __name__ == '__main__':
+
+    def main(page:ft.Page):
+        q = DragAndDrop(page=page)
+
+        page.add(q)
+        for i in range(6):
+            page.add(q.new_grag_drop())
+    ft.app(main)
