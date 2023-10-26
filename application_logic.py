@@ -74,21 +74,6 @@ class Table(f.UserControl):
 
 def main(page: f.Page):
 
-    lessons = f.Dropdown(
-        width=120,
-        label='Уроки',
-        options=[
-            f.dropdown.Option('None'),
-        ],
-    )
-    teachers = f.Dropdown(
-        width=120,
-        label='Учителя',
-        options=[
-            f.dropdown.Option('None'),
-        ],
-    )
-
 
     dlg = f.AlertDialog(
         title=f.Text("Добавление нового урока"),
