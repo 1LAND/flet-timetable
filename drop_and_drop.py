@@ -44,7 +44,7 @@ class DragAndDrop(ft.UserControl):
                 content_feedback=ft.Container(
                             width=20,
                             height=20,
-                            bgcolor=self.__bgcolor,
+                            bgcolor=self.__bgcolor+'700',
                             border_radius=3,
                         ),
             )],

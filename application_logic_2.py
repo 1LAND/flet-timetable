@@ -1,42 +1,56 @@
 import flet as f
 from flet import colors
+from functools import partial
 from drop_and_drop import DragAndDrop
+from secret_code import keyboard_event
+
 
 class ClassBar(f.UserControl):
     def __init__(self,page:f.Page):
         super().__init__()
         self.page = page
-        self.classes = {}
         self.setting_btn = f.PopupMenuButton(
-        
-        items=[
-            f.PopupMenuItem(text="Item 1"),
-            f.PopupMenuItem(icon=f.icons.POWER_INPUT, text="Check power"),
-            f.PopupMenuItem(
-                content=f.Row(
-                    [
-                        f.Icon(f.icons.HOURGLASS_TOP_OUTLINED),
-                        f.Text("Item with a custom content"),
-                    ]
+                items=[
+                f.PopupMenuItem(text="Item 1"),
+                f.PopupMenuItem(icon=f.icons.POWER_INPUT, text="Check power"),
+                f.PopupMenuItem(
+                    content=f.Row(
+                        [
+                            f.Icon(f.icons.HOURGLASS_TOP_OUTLINED),
+                            f.Text("Item with a custom content"),
+                        ]
+                    ),
+                    on_click=lambda _: print("Button with a custom content clicked!"),
                 ),
-                on_click=lambda _: print("Button with a custom content clicked!"),
-            ),
-            f.PopupMenuItem(),  # divider
-            f.PopupMenuItem(
-                text="Checked item", checked=False, 
-            ),
-        ]
-    )
+                f.PopupMenuItem(),  # divider
+                f.PopupMenuItem(
+                    text="Checked item", checked=False, 
+                ),
+            ]
+        )
         self.add_btn = f.FloatingActionButton(
                 icon=f.icons.ADD,
-                on_click=self.add_class
+                on_click=self.open_alert,
                 )
         self.layout = f.Column(controls=[],
             width=80,
             horizontal_alignment=f.CrossAxisAlignment.CENTER,
             )
         self.dlg = None
-
+        self.cells = []
+        self.cell = {
+            'lessons':None,
+            'teachers':None,
+            'classes':None,
+            'rooms':None,
+            'color':None,
+        }
+        self.lessons_list = []
+        self.teachers_list = []
+        self.classes_list = []
+        self.rooms_list = []
+        self.page.on_keyboard_event=partial(keyboard_event,self.page,self)
+   
     def build(self):
         self.layout.controls.append(self.setting_btn)
         self.layout.controls.append(self.add_btn)
@@ -46,7 +60,19 @@ class ClassBar(f.UserControl):
         ])
 
     def create_alert(self):    
+        
+        def try_add_cell(e):
+            if all([self.lessons.current.value, 
+                self.teachers.current.value,
+                self.rooms.current.value,
+                self.classes.current.value]):
+                self.close_alert(e)    
 
+        def dropdown_changed(e):
+            self.cell['lessons'] = self.lessons.current.value
+            self.cell['teachers'] = self.teachers.current.value
+            self.cell['classes'] = self.classes.current.value
+            self.cell['rooms'] = self.rooms.current.value
         def color_option_creator(color: str):
             return f.Container(
                 bgcolor=color,
@@ -65,16 +91,20 @@ class ClassBar(f.UserControl):
                     v.border = f.border.all(3, colors.BLACK26)
                 else:
                     v.border = None
+            self.cell['color'] = self.color_options.data
             self.dlg.content.update()
+
 
         self.lessons = f.Ref[f.Dropdown]()
         self.teachers = f.Ref[f.Dropdown]()
+        self.classes = f.Ref[f.Dropdown]()
         self.rooms = f.Ref[f.Dropdown]()
 
         dict_dropdown = {
-            'Уроки':self.lessons,
-            'Учителя':self.teachers,
-            'Кабинеты':self.rooms,
+            'Уроки':[self.lessons,self.lessons_list],
+            'Учителя':[self.teachers,self.teachers_list],
+            'Кабинеты':[self.rooms,self.rooms_list],
+            'Класс':[self.classes,self.classes_list],
         }
 
         list_dropdown = []
@@ -82,12 +112,11 @@ class ClassBar(f.UserControl):
         for i in dict_dropdown:
             list_dropdown.append(
                 f.Dropdown(
-                    ref=dict_dropdown[i],
+                    ref=dict_dropdown[i][0],
                     width=150,
                     label=i,
-                    options=[
-                        f.dropdown.Option('None'),
-                    ]
+                    options=dict_dropdown[i][1],
+                    on_change=dropdown_changed
                 )
             )
 
@@ -123,40 +152,40 @@ class ClassBar(f.UserControl):
             content=f.Row(
                 [f.Column(
                 controls=list_dropdown,
-                height=200,
+                height=230,
                 width=225,
                 horizontal_alignment=f.CrossAxisAlignment.CENTER 
                 ),
                 f.Column(controls=[self.color_options],
                 width=225,
-                height=200,
-                )]
+                height=230,
+                alignment=f.MainAxisAlignment.CENTER
+                )],
             ),
             actions=[
                 f.TextButton("Закрыть",on_click=self.close_alert),
-                f.FloatingActionButton(icon=f.icons.ADD,), 
+                f.FloatingActionButton(
+                    icon=f.icons.ADD,
+                    on_click=try_add_cell
+                ), 
             ],
             actions_alignment=f.MainAxisAlignment.END,
-            on_dismiss=lambda e: print("Modal dialog dismissed!"),
         ) 
-    def alert_open(self):
+    def open_alert(self,e):
+        if not self.dlg:
+            self.create_alert()
         self.page.dialog = self.dlg
         self.dlg.open = True
         self.page.update()
     def close_alert(self,e):
         self.dlg.open = False
         self.page.update()
+    def add_cell(self,e):
+        print(self.cell)
 
-    def add_class(self,e):
-        if not self.dlg:
-            self.create_alert()
-        self.alert_open()
-        # self.classes['A1'] = DragAndDrop(self.page,group='A1')
-        # self.classes
-        # self.layout.controls.remove(e.control)
-        # self.layout.controls.append(self.classes['A1'])
-        # self.layout.controls.append(self.add_btn)
-        self.update()
+    def add_on_dd_list(self,list:list,elem:str):
+        list.append(f.dropdown.Option(elem))
+
 def main(page: f.Page): 
 
     page.add(

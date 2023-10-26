@@ -67,17 +67,8 @@ class Navigation(UserControl):
         self.page.appbar = self.appbar
         self.page.update()
     def build(self):
-        self.box = Layout(self,self.page)
+        self.box = ft.Row()
         return self.box
-    def initialize(self):
-        self.page.views.clear()
-        self.page.views.append(
-            ft.View(
-                "/",
-                [self.appbar, self.box],
-            )
-        )
-        self.page.go("/")
         # self.page.update()
     def route_change(self, e):
         troute = TemplateRoute(self.page.route)
@@ -90,7 +81,6 @@ def main(page: ft.Page):
     app = Navigation(page)
     page.add(app)
     page.update()
-    app.initialize()
 
 
 
