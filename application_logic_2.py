@@ -2,7 +2,6 @@ import flet as f
 from flet import colors
 from functools import partial
 from drop_and_drop import DragAndDrop
-from secret_code import keyboard_event
 
 
 class ClassBar(f.UserControl):
@@ -49,7 +48,7 @@ class ClassBar(f.UserControl):
         self.teachers_list = []
         self.classes_list = []
         self.rooms_list = []
-        self.page.on_keyboard_event=partial(keyboard_event,self.page,self)
+        # self.page.on_keyboard_event=partial(keyboard_event,self.page,self)
    
     def build(self):
         self.layout.controls.append(self.setting_btn)
