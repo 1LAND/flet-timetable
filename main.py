@@ -1,10 +1,11 @@
 import flet as f
+import flet_core
 from flet import colors
 from functools import partial
 from drop_and_drop import DragAndDrop
+from admin import ProgrammingPanel
 
-
-class ClassBar(f.UserControl):
+class Table(f.UserControl):
     def __init__(self,page:f.Page):
         super().__init__()
         self.page = page
@@ -31,13 +32,14 @@ class ClassBar(f.UserControl):
                 icon=f.icons.ADD,
                 on_click=self.open_alert,
                 )
-        self.layout = f.Column(controls=[],
+        self.leftbar = f.Column(controls=[],
             width=80,
             horizontal_alignment=f.CrossAxisAlignment.CENTER,
             )
         self.dlg = None
         self.cells = []
         self.cell = {
+            'num':0,
             'lessons':None,
             'teachers':None,
             'classes':None,
@@ -48,30 +50,34 @@ class ClassBar(f.UserControl):
         self.teachers_list = []
         self.classes_list = []
         self.rooms_list = []
-        # self.page.on_keyboard_event=partial(keyboard_event,self.page,self)
+        pp = ProgrammingPanel(self.page,bar=self,add_dd=self.add_on_dd_list,test_info=self.test)
+        self.page.on_keyboard_event=pp.keyboard_event
    
     def build(self):
-        self.layout.controls.append(self.setting_btn)
-        self.layout.controls.append(self.add_btn)
+        self.leftbar.controls.append(self.setting_btn)
+        self.leftbar.controls.append(self.add_btn)
         return f.Row([
-            self.layout,
-            f.VerticalDivider(width=1),
+            self.leftbar,
+            f.Column(controls=[
+                f.Container(bgcolor=f.colors.WHITE,height=1000,blur=(0, 10),)
+            ],width=1),
+            
         ])
 
     def create_alert(self):    
         
         def try_add_cell(e):
-            if all([self.lessons.current.value, 
-                self.teachers.current.value,
-                self.rooms.current.value,
-                self.classes.current.value]):
+            if all([self.lessons.current.value, self.teachers.current.value, self.rooms.current.value, self.classes.current.value]):
                 self.close_alert(e)    
+                self.add_cell()
+                
 
         def dropdown_changed(e):
             self.cell['lessons'] = self.lessons.current.value
             self.cell['teachers'] = self.teachers.current.value
             self.cell['classes'] = self.classes.current.value
             self.cell['rooms'] = self.rooms.current.value
+
         def color_option_creator(color: str):
             return f.Container(
                 bgcolor=color,
@@ -146,7 +152,7 @@ class ClassBar(f.UserControl):
             self.color_options.controls.append(v)
 
         self.dlg = f.AlertDialog(
-            modal=True,
+            modal=False,
             title=f.Text("Добавить урок"),
             content=f.Row(
                 [f.Column(
@@ -180,21 +186,30 @@ class ClassBar(f.UserControl):
         self.dlg.open = False
         self.page.update()
     def add_cell(self,e):
-        print(self.cell)
+        ...
 
     def add_on_dd_list(self,list:list,elem:str):
         list.append(f.dropdown.Option(elem))
 
-def main(page: f.Page): 
-
-    page.add(
-        f.Row(
-            [
-                ClassBar(page),
-                f.Column([ f.Text("Body!")], alignment=f.MainAxisAlignment.START, expand=True),
-            ],
-            expand=True,
+    def test(self):
+        for i in ['Русский','Математика','Физика','Информатика','География']:
+            self.add_on_dd_list(self.lessons_list,i)
+        for i in ['AЮ','-','НВ','ОС']:
+            self.add_on_dd_list(self.teachers_list,i)
+        for i in [i for i in range(100,110)]:
+            self.add_on_dd_list(self.rooms_list,i)
+        for i in ['1А','2Б','3В','4Д','5Е']:
+            self.add_on_dd_list(self.classes_list,i)
+if __name__ == '__main__':
+    def main(page: f.Page): 
+        page.title = 'LAND расписание'
+        page.add(
+            f.Row(
+                [
+                    Table(page),
+                ],
+                expand=True,
+            )
         )
-    )
 
-f.app(target=main)
+    f.app(target=main)

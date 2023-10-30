@@ -18,7 +18,7 @@ class ProgrammingPanel(Control):
             self.text_code.current.border_color = f.colors.RED_900
             self.page.update()
         else:
-            self.create_banner(f'function Accept: {self.text_code}',[f.TextButton("Cancel", on_click=self.close_banner)])
+            self.create_banner(f'function Accept: {self.text_code}, {self.text_code.current.value}',[f.TextButton("Cancel", on_click=self.close_banner)])
             self.open_banner(e)
     def create_dlg(self):
         self.err_text = f.Ref[f.Text]()
