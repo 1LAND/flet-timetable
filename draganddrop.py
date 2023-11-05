@@ -29,6 +29,12 @@ class DragAndDrop(ft.UserControl):
         e.control.update()
         self.page.update()
     
+    def drag_to_default(self,e):
+        e.control.bgcolor = "grey400"
+        e.control.content.value = None
+        # e.control.control.border = None
+        e.control.update()
+        self.page.update()
     def build(self):
         return ft.Row([ft.Draggable(
                 ref=self.__ref,
@@ -50,16 +56,17 @@ class DragAndDrop(ft.UserControl):
             )],
             alignment=ft.MainAxisAlignment.CENTER
             )
-    def new_grag_drop(self):
+    def new_grag_drop(self,*,text:str="",key:str|int=0,size:int=20):
         return ft.Row([ft.DragTarget(
                     group=self.__group,
                     content=ft.Container(
-                        width=50,
-                        height=50,
-                        bgcolor=ft.colors.BLUE_GREY_100,
-                        content=ft.Text(''),
-                        border_radius=5,
+                        width=size,
+                        height=size,
+                        bgcolor="grey400",
+                        content=ft.Text(key=key),
+                        border_radius=size/4,
                         alignment=ft.alignment.center,
+                        on_long_press=self.drag_to_default,
                     ),
                     on_accept=self.drag_accept,
                     on_will_accept=self.drag_will_accept,
@@ -99,7 +106,6 @@ if __name__ == '__main__':
 
     def main(page:ft.Page):
         q = DragAndDrop(page=page)
-
         page.add(q)
         for i in range(6):
             page.add(q.new_grag_drop())
