@@ -132,6 +132,30 @@ class RBar(ft.UserControl):
             border_radius=10,
             alignment=ft.alignment.center
             )
+
+    def add_row(self,table:ft.DataTable,row:str):
+        for i in table.rows:
+            if i.cells[0].content.value == row: return False
+        data_row = ft.DataRow()
+        for i in range(len(table.columns)):
+            if i == 0:
+                data_row.cells.append(ft.DataCell(ft.Text(row)))
+            else:
+                data_row.cells.append(ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)))
+        table.rows.append(data_row)
+        table.update()
+        self.page.update()
+        return True
+    def add_col(self,table:ft.DataTable,col:str):
+        for i in table.columns:
+            if i.label.value == col: return False
+        table.columns.append(ft.DataColumn(ft.Text(col)))
+        for i in table.rows:
+            if len(i.cells) != len(table.columns):
+                i.cells.append(ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)))
+        table.update()
+        self.page.update()
+        return True
     def add_table(self,e):
         def open_dlg(e):
             self.page.dialog = dlg
@@ -141,16 +165,23 @@ class RBar(ft.UserControl):
             dlg.open = False
             self.page.update()
         def add_col_or_row(e):
-            ...
+            if cols.current.value:
+                if self.add_col(table.current,cols.current.value):
+                    dlg.content.controls[-1].width += 100
+                    dlg.content.controls[-1].update()
+            if rows.current.value:
+                self.add_row(table.current,rows.current.value)
         table_name = ft.Ref[ft.TextField]()
         cols = ft.Ref[ft.TextField]()
         rows = ft.Ref[ft.TextField]()
+        table = ft.Ref[ft.DataTable]()
+
         dlg = ft.AlertDialog(
             title=ft.Text("Добавить табличку"),
-            content=ft.Row([
-                ft.Column([
-                    ft.Text("Конфигурацию таблички",size=20),
+            content=
+                ft.Row([
                     ft.Column([
+                            ft.Text("Конфигурацию таблички",size=20),
                             ft.TextField(
                                 ref=cols,
                                 label="Название колонки",
@@ -172,46 +203,44 @@ class RBar(ft.UserControl):
                                 mini=True,
                                 on_click=add_col_or_row
                             ),],
-                        height=300,
+                        height=200,
                         width=300,
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER
                 ),
-                ft.Text(""),],
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.VerticalDivider(width=10),
-            ft.Column([          
-                ft.Text("Предпросмотр",size=20),     
-                DragAndDrop(self.page,text="Уч",bgcolor="blue900"), 
-                ft.DataTable(
-                    columns=[
-                        ft.DataColumn(ft.Text("")),
-                        ft.DataColumn(ft.Text("1")),
-                        ft.DataColumn(ft.Text("2")),
-                        ft.DataColumn(ft.Text("3")),
-                    ],
-                    rows=[
-                        ft.DataRow(
-                            cells=[
-                                ft.DataCell(ft.Text("1A")),
-                                ft.DataCell(DragAndDrop(self.page).new_grag_drop(text="УЧ",size=30,)),
-                                ft.DataCell(DragAndDrop(self.page).new_grag_drop(text="УЧ",size=30,)),
-                                ft.DataCell(DragAndDrop(self.page).new_grag_drop(text="УЧ",size=30,)),
-                            ],
+                ft.VerticalDivider(width=10),      
+                ft.Column([
+                    ft.Text("Предпросмотр",size=20),  
+                    DragAndDrop(self.page,text="Уч",bgcolor="blue900"), 
+                    ft.DataTable(
+                        ref=table,
+                        columns=[
+                            ft.DataColumn(ft.Text("")),
+                            ft.DataColumn(ft.Text("1")),
+                            ft.DataColumn(ft.Text("2")),
+                            ft.DataColumn(ft.Text("3")),
+                        ],
+                        rows=[
+                            ft.DataRow(
+                                cells=[
+                                    ft.DataCell(ft.Text("11A")),
+                                    ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)),
+                                    ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)),
+                                    ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)),
+                                ],
 
-                        ),
+                            ),
+                        ],
+                    ),
                     ],
-                ),
-                ft.Text(),
-                ],
-                height=300,
-                width=400,
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER)
-            ]),
+                    height=200,
+                    width=300,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+                ],),
             actions=[
                 ft.TextButton("Закрыть",on_click=close_dlg,height=50,),
-                ft.TextField(ref=table_name,label="Название таблички",border_color="white",width=300),
+                ft.TextField(ref=table_name,label="Название таблички",border_color="white",width=250),
                 ft.FloatingActionButton(
                     content=ft.Row([
                         ft.Icon(ft.icons.ADD),
