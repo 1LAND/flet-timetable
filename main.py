@@ -32,14 +32,10 @@ class LBar(ft.UserControl):
                         return 0
 
                 text=f"{dd_teacher.current.value}\n{dd_room.current.value}\n{dd_lesson.current.value}"
-                self.components.current.controls.append(DragAndDrop(self.page,text=text,bgcolor=random.choice(colors)+str(random.randint(6,9))+"00"))
+                self.components.current.controls.append(DragAndDrop(self.page,value=text,bgcolor=random.choice(colors)+str(random.randint(6,9))+"00",text_size=10))
                 self.components.current.update()
                 close_dlg(e)
             
-
-
-
-
         dd_teacher = ft.Ref[ft.Dropdown]()
         dd_room    = ft.Ref[ft.Dropdown]()
         dd_lesson  = ft.Ref[ft.Dropdown]()
@@ -133,26 +129,44 @@ class RBar(ft.UserControl):
             alignment=ft.alignment.center
             )
 
+    
+
     def add_row(self,table:ft.DataTable,row:str):
+        if len(table.rows) == 1 and table.rows[0].cells[0].content.value == '':
+            table.rows[0].cells[0].content.value = row
+            table.rows[0].cells[0].content.update()
+            table.update()
+            self.page.update()
+            return False 
         for i in table.rows:
-            if i.cells[0].content.value == row: return False
+            if i.cells and i.cells[0].content.value == row: return False
         data_row = ft.DataRow()
         for i in range(len(table.columns)):
             if i == 0:
                 data_row.cells.append(ft.DataCell(ft.Text(row)))
             else:
-                data_row.cells.append(ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)))
+                data_row.cells.append(ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)))
         table.rows.append(data_row)
         table.update()
         self.page.update()
         return True
     def add_col(self,table:ft.DataTable,col:str):
+        if not table.columns:
+            table.columns.append(ft.DataColumn(ft.Text('')))
+            table.rows[-1].cells.append(ft.DataCell(ft.Text('')))
+            table.columns.append(ft.DataColumn(ft.Text(col)))
+            table.rows[-1].cells.append(DragAndDrop(self.page,is_teacher=False,item_size=30))
+            table.update()
+            self.page.update()
+            return False
         for i in table.columns:
             if i.label.value == col: return False
+        # if not table.columns:
+        #     table.columns.append(ft.DataColumn(ft.Text('')))
         table.columns.append(ft.DataColumn(ft.Text(col)))
         for i in table.rows:
             if len(i.cells) != len(table.columns):
-                i.cells.append(ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)))
+                i.cells.append(ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)))
         table.update()
         self.page.update()
         return True
@@ -167,8 +181,12 @@ class RBar(ft.UserControl):
         def add_col_or_row(e):
             if cols.current.value:
                 if self.add_col(table.current,cols.current.value):
-                    dlg.content.controls[-1].width += 100
-                    dlg.content.controls[-1].update()
+                    if isinstance(dlg.content.controls[-1].width,int):
+                        dlg.content.controls[-1].width += 100
+                        dlg.content.controls[-1].update()
+                    rows.current.disabled = False
+                    rows.current.update()
+                    self.page.update()
             if rows.current.value:
                 self.add_row(table.current,rows.current.value)
         table_name = ft.Ref[ft.TextField]()
@@ -194,50 +212,52 @@ class RBar(ft.UserControl):
                                 ),
                             ft.FloatingActionButton(
                                 content=ft.Row([
-                                    ft.Icon(ft.icons.ADD),
-                                    ft.Text("Добавить элемент",size=20)
-                                    ],
+                                        ft.Icon(ft.icons.ADD),
+                                        ft.Text("Добавить элемент",size=20)
+                                        ],
                                     alignment="center",
                                     spacing=5),
                                 width=300,
                                 mini=True,
                                 on_click=add_col_or_row
                             ),],
-                        height=200,
-                        width=300,
-                        alignment=ft.MainAxisAlignment.CENTER,
+                        alignment=ft.MainAxisAlignment.START,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER
                 ),
                 ft.VerticalDivider(width=10),      
-                ft.Column([
-                    ft.Text("Предпросмотр",size=20),  
-                    DragAndDrop(self.page,text="Уч",bgcolor="blue900"), 
-                    ft.DataTable(
-                        ref=table,
-                        columns=[
-                            ft.DataColumn(ft.Text("")),
-                            ft.DataColumn(ft.Text("1")),
-                            ft.DataColumn(ft.Text("2")),
-                            ft.DataColumn(ft.Text("3")),
-                        ],
-                        rows=[
-                            ft.DataRow(
-                                cells=[
-                                    ft.DataCell(ft.Text("11A")),
-                                    ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)),
-                                    ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)),
-                                    ft.DataCell(DragAndDrop(self.page).new_grag_drop(size=30,)),
-                                ],
+                ft.Column(
+                    controls=[
+                        ft.Text("Предпросмотр",size=20),  
+                        DragAndDrop(self.page,value="Уч",bgcolor="blue900"), 
+                        ft.DataTable(
+                            ref=table,
+                            columns=[
+                                # ft.DataColumn(ft.Text("")),
+                                # ft.DataColumn(ft.Text("1")),
+                                # ft.DataColumn(ft.Text("2")),
+                                # ft.DataColumn(ft.Text("3")),
+                            ],
+                            rows=[
+                                ft.DataRow(
+                                    cells=[
+                                        # ft.DataCell(ft.Text("11A")),
+                                        # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
+                                        # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
+                                        # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
+                                    ],
 
-                            ),
-                        ],
-                    ),
+                                ),
+                            ],
+                        ),
                     ],
-                    height=200,
-                    width=300,
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                ],),
+                    scroll=ft.ScrollMode.ALWAYS,
+                    alignment=ft.MainAxisAlignment.START,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    auto_scroll=True),
+                ],
+                scroll=ft.ScrollMode.ALWAYS,
+                auto_scroll=True,
+                height=400),
             actions=[
                 ft.TextButton("Закрыть",on_click=close_dlg,height=50,),
                 ft.TextField(ref=table_name,label="Название таблички",border_color="white",width=250),
