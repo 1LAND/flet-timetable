@@ -69,7 +69,6 @@ class ProgrammingPanel(Control):
         if e.shift and e.key == '~':
             self.open_dlg(e)
 
-
 if __name__ == '__main__':
     def main(page:f.Page):
         pp = ProgrammingPanel(page)

@@ -4,6 +4,9 @@ import random
 from admin import ProgrammingPanel
 from draganddrop import DragAndDrop
 
+
+
+
 class LBar(ft.UserControl):
     def __init__(self,page:ft.Page,info=''):
         super().__init__()
@@ -145,7 +148,7 @@ class RBar(ft.UserControl):
             if i == 0:
                 data_row.cells.append(ft.DataCell(ft.Text(row)))
             else:
-                data_row.cells.append(ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)))
+                data_row.cells.append(ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30,group=(row))))
         table.rows.append(data_row)
         table.update()
         self.page.update()
@@ -155,18 +158,16 @@ class RBar(ft.UserControl):
             table.columns.append(ft.DataColumn(ft.Text('')))
             table.rows[-1].cells.append(ft.DataCell(ft.Text('')))
             table.columns.append(ft.DataColumn(ft.Text(col)))
-            table.rows[-1].cells.append(DragAndDrop(self.page,is_teacher=False,item_size=30))
+            table.rows[-1].cells.append(DragAndDrop(self.page,is_teacher=False,item_size=30,group=(col)))
             table.update()
             self.page.update()
             return False
         for i in table.columns:
             if i.label.value == col: return False
-        # if not table.columns:
-        #     table.columns.append(ft.DataColumn(ft.Text('')))
         table.columns.append(ft.DataColumn(ft.Text(col)))
         for i in table.rows:
             if len(i.cells) != len(table.columns):
-                i.cells.append(ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)))
+                i.cells.append(ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30,group=(col))))
         table.update()
         self.page.update()
         return True
@@ -223,40 +224,41 @@ class RBar(ft.UserControl):
                             ),],
                         alignment=ft.MainAxisAlignment.START,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                ),
-                ft.VerticalDivider(width=10),      
-                ft.Column(
-                    controls=[
-                        ft.Text("Предпросмотр",size=20),  
-                        DragAndDrop(self.page,value="Уч",bgcolor="blue900"), 
-                        ft.DataTable(
-                            ref=table,
-                            columns=[
-                                # ft.DataColumn(ft.Text("")),
-                                # ft.DataColumn(ft.Text("1")),
-                                # ft.DataColumn(ft.Text("2")),
-                                # ft.DataColumn(ft.Text("3")),
-                            ],
-                            rows=[
-                                ft.DataRow(
-                                    cells=[
-                                        # ft.DataCell(ft.Text("11A")),
-                                        # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
-                                        # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
-                                        # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
-                                    ],
+                    ),
+                    ft.VerticalDivider(width=10),      
+                    ft.Column(
+                        controls=[
+                            ft.Text("Предпросмотр",size=20),  
+                            DragAndDrop(self.page,value="Уч",bgcolor="blue900"), 
+                            ft.DataTable(
+                                ref=table,
+                                columns=[
+                                    # ft.DataColumn(ft.Text("")),
+                                    # ft.DataColumn(ft.Text("1")),
+                                    # ft.DataColumn(ft.Text("2")),
+                                    # ft.DataColumn(ft.Text("3")),
+                                ],
+                                rows=[
+                                    ft.DataRow(
+                                        cells=[
+                                            # ft.DataCell(ft.Text("11A")),
+                                            # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
+                                            # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
+                                            # ft.DataCell(DragAndDrop(self.page,is_teacher=False,item_size=30)),
+                                        ],
 
-                                ),
-                            ],
-                        ),
-                    ],
-                    scroll=ft.ScrollMode.ALWAYS,
-                    alignment=ft.MainAxisAlignment.START,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    auto_scroll=True),
+                                    ),
+                                ],
+                            ),
+                        ],
+                        scroll=ft.ScrollMode.ALWAYS,
+                        alignment=ft.MainAxisAlignment.START,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        auto_scroll=True),
                 ],
                 scroll=ft.ScrollMode.ALWAYS,
                 auto_scroll=True,
+                width=700,
                 height=400),
             actions=[
                 ft.TextButton("Закрыть",on_click=close_dlg,height=50,),
